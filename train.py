@@ -4,17 +4,19 @@ from model_utils import *
 import pandas as pd
 import torch
 from torch import nn
+#torch.cuda.set_device(1)
 
 if __name__ == '__main__':
     # PREPROCESSING
     #   ├ Import data and create the base dataset
-    imgs_labels = pd.read_csv('data/images_labelling.csv')
+    data_dir = 'data/'
+    imgs_labels = pd.read_csv(data_dir+'images_labelling.csv')
     id_targets = dict(zip(imgs_labels['boxid'], imgs_labels['class_']))
-    dataset = MyDataset(id_targets, imgs_folder='images/', transform=resize)
+    dataset = MyDataset(id_targets, imgs_folder=data_dir+'images/', transform=resize)
     unique_labels = np.unique(list(dataset.targets.values()))
 
     #   ├ Split data to train, test and validation parts
-    split_sizes = (3000, 500, 250)
+    split_sizes = (2750, 500, 500)
     splitted_data = train_test_val_split(dataset, sizes=split_sizes)
 
     #   ├ Filter team A and team B data
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     #                                       └   (team B player)  -> b_team_model ┘
 
     calculate_loss = nn.CrossEntropyLoss()
-    dump_dir = 'dumps/'
+    dump_dir = 'models/train_dumps/'
 
     # 1. Base model
     print('Training the base model...')
@@ -49,12 +51,16 @@ if __name__ == '__main__':
 
     #       ├ Train the model
     opt = torch.optim.AdamW(base_model.parameters(), lr=1e-4)
-    train(base_model, 45, dump_dir + 'base.pth',
+    train(base_model, 50, dump_dir + 'base.pth',
           base_labels, dataloaders, calculate_loss, opt,
           visualize_every=1, plot=False)
 
     #       └ Validate the model
+    base_model = torch.load(dump_dir + 'base.pth')
     validation_results(base_model, base_labels, dataloaders['val'])
+    
+    if torch.cuda.is_available(): # clear cache
+        torch.cuda.empty_cache() 
 
     # 2. Team A model
     print('Training the team A model...')
@@ -63,13 +69,17 @@ if __name__ == '__main__':
     a_team_model = initialize_efficientnet('efficientnet-b3', a_team_labels)
 
     #       ├ Train the model
-    opt = torch.optim.AdamW(base_model.parameters(), lr=1e-4)
-    train(a_team_model, 45, dump_dir + 'a_team.pth',
+    opt = torch.optim.AdamW(a_team_model.parameters(), lr=1e-4)
+    train(a_team_model, 70, dump_dir + 'a_team.pth',
           a_team_labels, a_team_dataloaders, calculate_loss, opt,
           visualize_every=1, plot=False)
 
     #       └ Validate the model
+    a_team_model = torch.load(dump_dir + 'a_team.pth')
     validation_results(a_team_model, a_team_labels, a_team_dataloaders['val'])
+    
+    if torch.cuda.is_available(): # clear cache
+        torch.cuda.empty_cache() 
 
     # 3. Team B model
     print('Training the team B model...')
@@ -79,11 +89,15 @@ if __name__ == '__main__':
 
     #       ├ Train the model
     opt = torch.optim.AdamW(b_team_model.parameters(), lr=1e-4)
-    train(b_team_model, 45, dump_dir + 'b_team.pth',
+    train(b_team_model, 70, dump_dir + 'b_team.pth',
           a_team_labels, a_team_dataloaders, calculate_loss, opt,
           visualize_every=1, plot=False)
 
     #       └ Validate the model
+    b_team_model = torch.load(dump_dir + 'b_team.pth')
     validation_results(b_team_model, b_team_labels, b_team_dataloaders['val'])
+    
+    if torch.cuda.is_available(): # clear cache
+        torch.cuda.empty_cache() 
 
     print('The training is done. Best models are saved in the {} directory.'.format(dump_dir))

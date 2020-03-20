@@ -1,6 +1,7 @@
 from torch.utils import data as tdata
 from torchvision import transforms as tt
 from skimage import io
+from matplotlib.pyplot import imread
 import copy
 import numpy as np
 
