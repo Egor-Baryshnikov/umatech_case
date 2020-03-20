@@ -25,7 +25,14 @@ def keyword_ohe(labels, label_classes):
 
 ohe_to_int = lambda ohe: torch.argmax(ohe, 1)  # convert ohe matrix to sequence of classes
 
+
 def initialize_efficientnet(model_name, model_labels):
+    """
+    Efficientnet model initialization: load pretrained + reshape out dense layer
+    :param model_name: efficientnet structure name
+    :param model_labels: set of possible labels model should predict (used for reshaping dense layer)
+    :return:
+    """
     model = EfficientNet.from_pretrained(model_name)
     model._fc = nn.Linear(model._fc.in_features, len(model_labels))
     if torch.cuda.is_available():
@@ -35,7 +42,7 @@ def initialize_efficientnet(model_name, model_labels):
 
 def train_an_epoch(model, required_labels, dataloaders, calculate_loss, opt):
     """
-
+    One-epoch model trainer
     :param model: torch model to train
     :param required_labels: set of labels to predict
     :param dataloaders: dictionary of batch iterators, 'Train' key in the dictionary is necessary
@@ -101,6 +108,15 @@ def visualize_loss(losses_dict, visualize_every=1, plot=True):
 
 
 def train(model, n_epochs, dump_file, *train_args, **visualizer_kwargs):
+    """
+    Train the model during n_epochs with constant learning rate and dumping best model.
+    :param model: torch model to train
+    :param n_epochs: number of epochs to train
+    :param dump_file: file to dump the best model
+    :param train_args: should contain [required_labels, dataloaders, calculate_loss, opt]
+    (see docstring for train_an_epoch)
+    :param visualizer_kwargs: flags for training visualizer (see docstring for visualize_loss)
+    """
     epoch_i = 0
 
     losses_dict = {'train': [], 'test': []}
@@ -121,6 +137,12 @@ def train(model, n_epochs, dump_file, *train_args, **visualizer_kwargs):
 
 
 def validation_results(model, required_labels, val_dataloader):
+    """
+    Prints results of model validation: cross entropy loss and classification error
+    :param model: model to validate
+    :param required_labels: labels which model predicts
+    :param val_dataloader: validation batches iterator
+    """
     model.cpu()
     model.eval()
     ce_loss = nn.CrossEntropyLoss()
