@@ -5,8 +5,8 @@ from matplotlib.pyplot import imread
 from bot_prediction import *
 
 # Bot initializing
-token = 'TOKEN'
-apihelper.proxy = 'PROXY'
+token = #'TOKEN'
+apihelper.proxy = #'PROXY'
 
 bot = telebot.TeleBot(token)
 
@@ -50,7 +50,7 @@ def photo(message):
 @bot.message_handler(content_types=['document'])
 def photo(message):
     # download the file
-    fileID = message.photo[-1].file_id
+    fileID = message.document.file_id
     file_info = bot.get_file(fileID)
     downloaded_file = bot.download_file(file_info.file_path)
 

@@ -1,6 +1,8 @@
 # Models dumps
 models/train_dumps/*.pth
 
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
