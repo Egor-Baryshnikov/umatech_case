@@ -5,8 +5,8 @@ from matplotlib.pyplot import imread
 from bot_prediction import *
 
 # Bot initializing
-token = #'TOKEN'
-apihelper.proxy = #'PROXY'
+token = 'TOKEN'
+apihelper.proxy = 'PROXY'
 
 bot = telebot.TeleBot(token)
 
