@@ -39,8 +39,7 @@ def photo(message):
     prediction_dict = classify_img(img.permute(2, 0, 1), base_model)
     sorted_prediction = sorted(prediction_dict.items(), key=lambda x: x[1], reverse=True)
     best_prediction = sorted_prediction[0]
-    bot.reply_to(message, 'Seems like this player is {} (probability {:.2f}%)'.format(best_prediction[0],
-                                                                                     100*best_prediction[1]))
+    bot.reply_to(message, '{}'.format(best_prediction[0]))
 
 @bot.message_handler(content_types=['document'])
 def photo(message):
