@@ -8,7 +8,7 @@ from torch import nn
 if __name__ == '__main__':
     # PREPROCESSING
     #   ├ Import data and create the base dataset
-    imgs_labels = pd.read_csv('images_labelling.csv')
+    imgs_labels = pd.read_csv('data/images_labelling.csv')
     id_targets = dict(zip(imgs_labels['boxid'], imgs_labels['class_']))
     dataset = MyDataset(id_targets, imgs_folder='images/', transform=resize)
     unique_labels = np.unique(list(dataset.targets.values()))
